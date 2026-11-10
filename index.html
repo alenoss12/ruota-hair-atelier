@@ -8,6 +8,7 @@
 </style>
 </head>
 <body><main class="page">
+<img src="LOGO.png" alt="Hair Atelier by Chiara" style="display:block; width:220px; max-width:80%; height:auto; margin:0 auto 20px; border-radius:12px;"> 
 <div aria-label="Hair Atelier by Chiara"><div class="brand">HAIR ATELIER</div><p class="by">By Chiara</p></div>
 <h1>LA RUOTA DELLA FORTUNA</h1><p class="subtitle">GIRA LA RUOTA E SCOPRI IL TUO PREMIO!</p>
 <div class="wheel-wrap"><div class="pointer">▼</div><canvas id="wheel" width="900" height="900" aria-label="Ruota con 12 spicchi e tre premi"></canvas></div>
@@ -18,7 +19,7 @@
 <div class="prize"><strong>BUONO PORTA UN’AMICA</strong><p>Condividi il relax: vieni in salone insieme a un'amica e avrete uno sconto speciale entrambe sul vostro servizio! Come fare? Scegli chi portare con te, prenotate insieme il vostro appuntamento e preparatevi a un momento di bellezza da condividere.</p></div>
 <div class="prize"><strong>PIEGA BENESSERE</strong><p>Per te ci sono in regalo il trattamento cute rigenerante, il massaggio rilassante e il rituale con gli oli essenziali. Come funziona? Quando vieni in salone, pagherai unicamente il costo della piega: al resto delle coccole ci penso io!</p></div>
 <p class="expiry">Premi validi fino al 12.12.2026</p></section>
-<p class="note">Versione dimostrativa: non utilizzare per distribuire premi reali.</p>
+<p class="note">Un giro per browser. Mostra la schermata del premio in salone. Questa versione non verifica l’identità e non impedisce duplicazioni o screenshot.</p>
 </main>
 <script>
 const prizes=[
@@ -28,8 +29,11 @@ const prizes=[
 ];
 const slots=Array.from({length:12},(_,i)=>i%3), canvas=document.querySelector('#wheel'),ctx=canvas.getContext('2d'),button=document.querySelector('#spin'),result=document.querySelector('#result');
 const center=450,radius=440,step=2*Math.PI/12;let rotation=0,spinning=false;
+const storageKey='hair-atelier-premio-v1';
+function showPrize(index){const prize=prizes[index];result.replaceChildren();const heading=document.createElement('h2'),body=document.createElement('p'),expiry=document.createElement('p');heading.textContent='Complimenti! Hai vinto: '+prize.title;body.textContent=prize.description;expiry.textContent='Premio valido fino al 12.12.2026';expiry.className='expiry';result.append(heading,body,expiry);result.style.display='block';button.disabled=true;button.textContent='PREMIO GIÀ ASSEGNATO';}
+try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved && Number.isInteger(saved.index) && saved.index>=0 && saved.index<3)showPrize(saved.index);}catch(e){}
 function draw(){ctx.clearRect(0,0,900,900);for(let i=0;i<12;i++){const start=rotation+i*step-Math.PI/2-step/2,end=start+step;ctx.beginPath();ctx.moveTo(center,center);ctx.arc(center,center,radius,start,end);ctx.closePath();ctx.fillStyle=i%2===0?'#e8c2ce':'#fffcf7';ctx.fill();ctx.strokeStyle='#c9a15d';ctx.lineWidth=3;ctx.stroke();const angle=(start+end)/2;ctx.save();ctx.translate(center+Math.cos(angle)*295,center+Math.sin(angle)*295);ctx.rotate(angle+Math.PI/2);ctx.fillStyle='#51352e';ctx.font='bold 24px Arial';ctx.textAlign='center';prizes[slots[i]].short.forEach((line,j)=>ctx.fillText(line,0,(j-.5)*29));ctx.restore();}ctx.beginPath();ctx.arc(center,center,118,0,2*Math.PI);ctx.fillStyle='#fffcf7';ctx.fill();ctx.strokeStyle='#c9a15d';ctx.lineWidth=12;ctx.stroke();ctx.fillStyle='#51352e';ctx.textAlign='center';ctx.font='bold 29px Georgia';ctx.fillText('HAIR ATELIER',center,center-9);ctx.font='italic 27px Georgia';ctx.fillText('By Chiara',center,center+29)}
 function easeOut(t){return 1-Math.pow(1-t,4)}
-button.addEventListener('click',()=>{if(spinning)return;spinning=true;button.disabled=true;result.style.display='none';const chosen=Math.floor(Math.random()*12),base=rotation,finalMod=((12-chosen)%12)*step;let delta=(finalMod-(base%(2*Math.PI))+2*Math.PI)%(2*Math.PI);const target=base+Math.PI*2*6+delta;const started=performance.now(),duration=5200;function frame(now){const t=Math.min(1,(now-started)/duration);rotation=base+(target-base)*easeOut(t);draw();if(t<1)requestAnimationFrame(frame);else{spinning=false;const prize=prizes[slots[chosen]];result.replaceChildren();const heading=document.createElement('h2'),body=document.createElement('p'),expiry=document.createElement('p');heading.textContent='Complimenti! Hai vinto: '+prize.title;body.textContent=prize.description;expiry.textContent='Premio valido fino al 12.12.2026';expiry.className='expiry';result.append(heading,body,expiry);result.style.display='block';result.scrollIntoView({behavior:'smooth',block:'nearest'});}}requestAnimationFrame(frame)});
+button.addEventListener('click',()=>{if(spinning||button.disabled)return;spinning=true;button.disabled=true;result.style.display='none';const chosen=Math.floor(Math.random()*12),base=rotation,finalMod=((12-chosen)%12)*step;let delta=(finalMod-(base%(2*Math.PI))+2*Math.PI)%(2*Math.PI);const target=base+Math.PI*2*6+delta;const started=performance.now(),duration=5200;function frame(now){const t=Math.min(1,(now-started)/duration);rotation=base+(target-base)*easeOut(t);draw();if(t<1)requestAnimationFrame(frame);else{spinning=false;const index=slots[chosen];try{localStorage.setItem(storageKey,JSON.stringify({index,playedAt:new Date().toISOString()}));}catch(e){}showPrize(index);result.scrollIntoView({behavior:'smooth',block:'nearest'});}}requestAnimationFrame(frame)});
 draw();
 </script></body></html>
