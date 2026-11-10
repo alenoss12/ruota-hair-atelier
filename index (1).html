@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La Ruota della Fortuna | Hair Atelier by Chiara</title>
+<style>
+:root{--pink:#e8c2ce;--cream:#fffcf7;--gold:#c9a15d;--ink:#51352e}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#fffaf9,#f6dce2 75%);color:var(--ink);font-family:Georgia,serif;text-align:center}.page{max-width:820px;margin:auto;padding:30px 16px 60px}.logo{width:110px;max-width:30%;height:auto}.brand{font-size:clamp(22px,5vw,36px);letter-spacing:.12em;margin:10px 0 0}.by{font-style:italic;font-size:25px;margin:0 0 22px}h1{color:#a77737;font-weight:normal;font-size:clamp(28px,6vw,45px);margin:10px 0}.subtitle{letter-spacing:.12em;font-size:13px}.wheel-wrap{position:relative;width:min(90vw,540px);margin:30px auto 20px;filter:drop-shadow(0 10px 15px #a77a6944)}canvas{width:100%;display:block;border:9px solid var(--gold);border-radius:50%;background:white}.pointer{position:absolute;z-index:2;top:-15px;left:50%;transform:translateX(-50%);font-size:43px;color:#ac792d;text-shadow:0 2px white}.spin{border:2px solid #f8e5b3;border-radius:40px;background:linear-gradient(#d7b36d,#a8752c);color:white;padding:16px 32px;font:bold 19px Arial;cursor:pointer;box-shadow:0 5px 15px #8e623344}.spin:disabled{opacity:.55;cursor:not-allowed}.panel{margin:30px auto;background:#fffcf7d9;border:2px solid var(--gold);border-radius:22px;padding:20px;max-width:690px;text-align:left}.panel h2{text-align:center;color:#a77737;font-weight:normal}.prize{border-top:1px solid #d9b778;padding:15px 0}.prize strong{font-size:18px}.prize p{line-height:1.55;margin-bottom:0}.result{display:none;margin:24px auto;max-width:690px;background:#fff;border:2px solid var(--gold);border-radius:18px;padding:22px}.result h2{color:#a77737}.expiry{font-weight:bold;text-align:center;color:#8c582c}.note{font:12px Arial,sans-serif;color:#6c5c58}
+</style>
+</head>
+<body><main class="page">
+<div aria-label="Hair Atelier by Chiara"><div class="brand">HAIR ATELIER</div><p class="by">By Chiara</p></div>
+<h1>LA RUOTA DELLA FORTUNA</h1><p class="subtitle">GIRA LA RUOTA E SCOPRI IL TUO PREMIO!</p>
+<div class="wheel-wrap"><div class="pointer">▼</div><canvas id="wheel" width="900" height="900" aria-label="Ruota con 12 spicchi e tre premi"></canvas></div>
+<button id="spin" class="spin">GIRA LA RUOTA</button>
+<section id="result" class="result" aria-live="polite"></section>
+<section class="panel"><h2>I TUOI PREMI</h2>
+<div class="prize"><strong>TRATTAMENTO NUTRIENTE</strong><p>Trattamento nutriente in omaggio.</p></div>
+<div class="prize"><strong>BUONO PORTA UN’AMICA</strong><p>Condividi il relax: vieni in salone insieme a un'amica e avrete uno sconto speciale entrambe sul vostro servizio! Come fare? Scegli chi portare con te, prenotate insieme il vostro appuntamento e preparatevi a un momento di bellezza da condividere.</p></div>
+<div class="prize"><strong>PIEGA BENESSERE</strong><p>Per te ci sono in regalo il trattamento cute rigenerante, il massaggio rilassante e il rituale con gli oli essenziali. Come funziona? Quando vieni in salone, pagherai unicamente il costo della piega: al resto delle coccole ci penso io!</p></div>
+<p class="expiry">Premi validi fino al 12.12.2026</p></section>
+<p class="note">Un giro per browser. Mostra la schermata del premio in salone. Questa versione non verifica l’identità e non impedisce duplicazioni o screenshot.</p>
+</main>
+<script>
+const prizes=[
+{title:'TRATTAMENTO NUTRIENTE',short:['TRATTAMENTO','NUTRIENTE'],description:'Trattamento nutriente in omaggio.'},
+{title:'BUONO PORTA UN’AMICA',short:['PORTA','UN’AMICA'],description:'Condividi il relax: vieni in salone insieme a un’amica e avrete uno sconto speciale entrambe sul vostro servizio! Come fare? Scegli chi portare con te, prenotate insieme il vostro appuntamento e preparatevi a un momento di bellezza da condividere.'},
+{title:'PIEGA BENESSERE',short:['PIEGA','BENESSERE'],description:'Per te ci sono in regalo il trattamento cute rigenerante, il massaggio rilassante e il rituale con gli oli essenziali. Come funziona? Quando vieni in salone, pagherai unicamente il costo della piega: al resto delle coccole ci penso io!'}
+];
+const slots=Array.from({length:12},(_,i)=>i%3), canvas=document.querySelector('#wheel'),ctx=canvas.getContext('2d'),button=document.querySelector('#spin'),result=document.querySelector('#result');
+const center=450,radius=440,step=2*Math.PI/12;let rotation=0,spinning=false;
+const storageKey='hair-atelier-premio-v1';
+function showPrize(index){const prize=prizes[index];result.replaceChildren();const heading=document.createElement('h2'),body=document.createElement('p'),expiry=document.createElement('p');heading.textContent='Complimenti! Hai vinto: '+prize.title;body.textContent=prize.description;expiry.textContent='Premio valido fino al 12.12.2026';expiry.className='expiry';result.append(heading,body,expiry);result.style.display='block';button.disabled=true;button.textContent='PREMIO GIÀ ASSEGNATO';}
+try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved && Number.isInteger(saved.index) && saved.index>=0 && saved.index<3)showPrize(saved.index);}catch(e){}
+function draw(){ctx.clearRect(0,0,900,900);for(let i=0;i<12;i++){const start=rotation+i*step-Math.PI/2-step/2,end=start+step;ctx.beginPath();ctx.moveTo(center,center);ctx.arc(center,center,radius,start,end);ctx.closePath();ctx.fillStyle=i%2===0?'#e8c2ce':'#fffcf7';ctx.fill();ctx.strokeStyle='#c9a15d';ctx.lineWidth=3;ctx.stroke();const angle=(start+end)/2;ctx.save();ctx.translate(center+Math.cos(angle)*295,center+Math.sin(angle)*295);ctx.rotate(angle+Math.PI/2);ctx.fillStyle='#51352e';ctx.font='bold 24px Arial';ctx.textAlign='center';prizes[slots[i]].short.forEach((line,j)=>ctx.fillText(line,0,(j-.5)*29));ctx.restore();}ctx.beginPath();ctx.arc(center,center,118,0,2*Math.PI);ctx.fillStyle='#fffcf7';ctx.fill();ctx.strokeStyle='#c9a15d';ctx.lineWidth=12;ctx.stroke();ctx.fillStyle='#51352e';ctx.textAlign='center';ctx.font='bold 29px Georgia';ctx.fillText('HAIR ATELIER',center,center-9);ctx.font='italic 27px Georgia';ctx.fillText('By Chiara',center,center+29)}
+function easeOut(t){return 1-Math.pow(1-t,4)}
+button.addEventListener('click',()=>{if(spinning||button.disabled)return;spinning=true;button.disabled=true;result.style.display='none';const chosen=Math.floor(Math.random()*12),base=rotation,finalMod=((12-chosen)%12)*step;let delta=(finalMod-(base%(2*Math.PI))+2*Math.PI)%(2*Math.PI);const target=base+Math.PI*2*6+delta;const started=performance.now(),duration=5200;function frame(now){const t=Math.min(1,(now-started)/duration);rotation=base+(target-base)*easeOut(t);draw();if(t<1)requestAnimationFrame(frame);else{spinning=false;const index=slots[chosen];try{localStorage.setItem(storageKey,JSON.stringify({index,playedAt:new Date().toISOString()}));}catch(e){}showPrize(index);result.scrollIntoView({behavior:'smooth',block:'nearest'});}}requestAnimationFrame(frame)});
+draw();
+</script></body></html>
